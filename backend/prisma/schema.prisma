@@ -1,0 +1,120 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Record {
+  id Int @id @default(autoincrement())
+  clientId Int
+  client Client @relation(fields: [clientId], references: [id])
+  data DateTime @default(now())
+  description String?
+}
+model Client {
+  id Int @id @default(autoincrement())
+  name String 
+  firstName String
+  phone String @unique
+  email String @unique
+  record Record[]
+  auto Auto[]
+  order Order[]
+}
+model Auto {
+   id Int @id @default(autoincrement())
+   clientId Int
+   client Client @relation(fields: [clientId], references: [id])
+   brandId Int
+   brand Brand @relation(fields: [brandId], references: [id])
+   vin String @unique
+   model String
+   year  DateTime
+}
+model Brand {
+  id Int @id @default(autoincrement())
+  brandName String @unique
+  auto Auto[]
+}
+model Order {
+  id Int @id @default(autoincrement())
+  clientId Int
+  client Client @relation(fields: [clientId], references: [id])
+  paymentId Int
+  payment Payment @relation(fields: [paymentId], references: [id])
+  reportId Int
+  report Report @relation(fields: [reportId], references: [id])
+  data DateTime @default(now())
+  order String
+  product OrderOnProduct[]
+  employee OrderEmployee[]
+  status OrderStatus[]
+}
+
+model OrderStatus {
+  orderId Int
+  order Order @relation(fields: [orderId], references: [id])
+  statusId Int
+  status Status @relation(fields: [statusId], references: [id])
+  @@id([orderId, statusId])
+}
+model Status {
+    id Int @id @default(autoincrement())
+    status String @unique
+    order OrderStatus[]
+}
+model OrderEmployee {
+  orderId Int
+  order       Order     @relation(fields: [orderId], references: [id])
+  employeeId Int
+  employee Employee @relation(fields: [employeeId], references: [id])
+  @@id([orderId, employeeId])
+}
+model OrderOnProduct {
+  order       Order     @relation(fields: [orderId], references: [id])
+  orderId     Int 
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+  @@id([orderId, productId])
+}
+model Employee {
+  id Int @id @default(autoincrement())
+  name String 
+  firstName String
+  positionId Int
+  position Position @relation(fields: [positionId], references: [id])
+  order OrderEmployee[]
+}
+model Position {
+  id Int @id @default(autoincrement())
+  employee Employee[]
+}
+model Product {
+   id Int @id @default(autoincrement())
+   name String
+   discreptipn String
+   price Float
+   count Int @default(0)
+   storeId Int
+   store Store @relation(fields: [storeId], references: [id])
+   order OrderOnProduct[]
+}
+model Store {
+  id Int @id @default(autoincrement())
+  product Product[]
+}
+model Payment {
+   id Int @id @default(autoincrement())
+   order Order[]
+   dateNow DateTime @default(now())
+   price Float
+}
+model Report {
+  id Int @id @default(autoincrement())
+  dataNow DateTime @default(now())
+  order Order[]
+}
